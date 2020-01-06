@@ -1,0 +1,20 @@
+{
+  "name": "modus-project",
+  "version": "1.0.0",
+  "description": "modus-assignment",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacobbogers/modus-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jacobbogers/modus-project/issues"
+  },
+  "homepage": "https://github.com/jacobbogers/modus-project#readme"
+}
