@@ -1,0 +1,23 @@
+{
+  "author": "jacob.bogers <Jacob.Bogers@doclerholding.com>",
+  "bugs": {
+    "url": "https://github.com/jacobbogers/modus-project/issues"
+  },
+  "description": "modus-assignment",
+  "engines": {
+    "node": ">= 8.3.0"
+  },
+  "homepage": "https://github.com/jacobbogers/modus-project#readme",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "modus-project",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jacobbogers/modus-project.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}
