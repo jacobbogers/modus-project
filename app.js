@@ -8,6 +8,9 @@ const safe = require('./utils/safe');
 const createServer = require('./utils/createServer');
 const createLogger = require('./utils/createLogger');
 const State = require('./utils/State');
+const bleedReadable = require('./utils/bleedReadable');
+const createHttpRequest = require('./utils/createHttpRequest');
+const createHttpClient = require('./utils/createHttpClient');
 
 
 async function startServer() {
@@ -43,9 +46,14 @@ async function startServer() {
     });
 
 
-    addMw('/something-else', 'post', async (req, resp, params) => {
+    addMw('/something-else', 'post', async (req, resp) => {
+        const [data, error] = await safe(bleedReadable(req));
+        console.log(data, error);
+        console.log(req.headers);
         resp.statusCode = 200;
         await safe(promisifyNativeObjectMethod(resp, 'end', 'hello-world'));
+        //const createHttpRequest = require('./utils/createHttpRequest');
+        //const createHttpClient = require('./utils/createHttpClient');
     });
 
     httpServer.listen(8080);
