@@ -37,7 +37,6 @@ const ngtsaRequest = createHttpClient(createHttpsRequest, logger, { host });
 // middleware helper, fetch safetyratings
 
 async function fetchSafetyRating(vehicleDataArray){
-    const host = process.env.NGTSA_HOST || 'one.nhtsa.gov'; //
     //T https://one.nhtsa.gov/webapi/api/SafetyRatings/VehicleId/<VehicleId>?format=json
     // no await so fire fetching data in parallel
     for(const vehicle of vehicleDataArray){
@@ -154,7 +153,15 @@ async function startServer() {
     addMw('/vehicles', 'post', middleware);
 
     // startup
-    httpServer.listen(8080);
+    let listenPort = 8080;
+    if (process.env.LISTEN_PORT){
+        listenPort = Number.parseInt(process.env.LISTEN_PORT);
+        if (isNaN(listenPort)){
+            listenPort = 8080;
+        }
+    } 
+
+    httpServer.listen(listenPort);
     await state.waitForState('ready');
     logger.info('Server listening on 8080');
 }
