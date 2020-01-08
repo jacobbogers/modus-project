@@ -67,7 +67,7 @@ async function middleware(req, resp, params) {
         throw new Error(`wrong http-verb used, ${method}`);
     }
     const withRating = params.withRating ? params.withRating.toLowerCase() : undefined;
-    if (!['true', 'false'].includes(withRating)) {
+    if (!['true', 'false', undefined].includes(withRating)) {
         throw new Error(`wrong withRating value, not true or false, [${withRating}]`);
     }
     //post
