@@ -1,21 +1,22 @@
-const http = require('http');
+const https = require('https');
 
-const agent = new http.Agent({
+const agent = new https.Agent({
     keepAlive: true,
     maxFreeSockets: 1000,
 });
 
-module.exports = function createHttpRequest(host, port, method, path, headers, proxyHost, proxyPort) {
+module.exports = function createHttpsRequest(host, port, method, path, headers) {
     const finalOptions = {
         agent,
-        host: proxyHost ? proxyHost : host,
-        port: proxyHost ? proxyPort || 80 : port || 80,
+        host,
+        port,
         path,
         method,
         setHost: false, // otherwise it will overwrite the "host" header
         headers,
     };
     // always FORCE host regardless of "setHost" setting
+    // node is not fully http complient doesnt put a host header in there automaticly
     finalOptions.headers.host = port ? `${host}:${port}` : `${host}`;
-    return http.request(finalOptions);
+    return https.request(finalOptions);
 };

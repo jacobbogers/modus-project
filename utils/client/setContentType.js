@@ -1,4 +1,4 @@
-modume.exports = function setContentType (headers, value = 'application/json') {
+function setContentType (headers, value = 'application/json') {
     const contentTypeKey = Object.keys(headers).find(key => key.toLowerCase() === 'content-type');
     if (contentTypeKey) {
         delete headers[contentTypeKey];

@@ -7,11 +7,11 @@ const { STATUS_CODES } = require('http');
 const { Path } = require('path-parser');
 
 //app
-const bleedReadable = require('./bleedReadable');
-const safe = require('./safe');
-const stripCtrlCodes = require('./stripCtrlCodes');
-const bindMethods = require('./bindMethods');
-const asPromiseSafe = require('./asPromiseSafe');
+const bleedReadable = require('../bleedReadable');
+const safe = require('../safe');
+const stripCtrlCodes = require('../stripCtrlCodes');
+const bindMethods = require('../bindMethods');
+const asPromiseSafe = require('../asPromiseSafe');
 
 
 // do not add event listeners twice
@@ -68,7 +68,18 @@ function createHttpServerDecorator(
                         if (urlParams) {
                             matched++;
                             logger.log(`matched ${url}`);
-                            handler(req, res, urlParams);
+                            try {
+                                await handler(req, res, urlParams);
+                            }
+                            catch(err){
+                                let errMsg = `[http-server][dcr05][error in handler][${String(err)}]`;
+                                logger.error(errMsg);
+                                [, error] = await asPromiseSafe(handler404, req, res);
+                                if (error) {
+                                    const errMsg = `[http-server][dcr06][catch-all function failed with error][${String(error)}]`;
+                                    logger.error(errMsg);
+                                }
+                            }
                         }
                     }
                 }
@@ -82,7 +93,7 @@ function createHttpServerDecorator(
                 else {
                     const [, err] = await asPromiseSafe(handler404, req, res);
                     if (err) {
-                        const errMsg = `[http-server][dcr06][catch-all function failed with error][${String(err)}]`;
+                        const errMsg = `[http-server][dcr07][catch-all function failed with error][${String(err)}]`;
                         logger.error(errMsg);
                     }
                 }
