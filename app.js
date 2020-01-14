@@ -1,4 +1,5 @@
 const http = require('http');
+const fs = require('fs');
 // "promisify" from util doesnt work on response.end() doesnt work with reponse.end
 const promisifyNativeObjectMethod = require('./utils/promisifyNativeObjectMethod');
 
@@ -22,6 +23,8 @@ function format(text) {
     return `[${new Date().toUTCString()}]: ${text}`
 }
 
+const image = fs.readFileSync('./000000-0.png');
+
 // the logger is now pluggable, use log4j or something else
 const logger = createLogger({
     log: text => console.log(colors.green(format(text))),
@@ -36,15 +39,15 @@ const ngtsaRequest = createHttpClient(createHttpsRequest, logger, { host });
 
 // middleware helper, fetch safetyratings
 
-async function fetchSafetyRating(vehicleDataArray){
+async function fetchSafetyRating(vehicleDataArray) {
     //T https://one.nhtsa.gov/webapi/api/SafetyRatings/VehicleId/<VehicleId>?format=json
     // no await so fire fetching data in parallel
-    for(const vehicle of vehicleDataArray){
+    for (const vehicle of vehicleDataArray) {
         const path = `/webapi/api/SafetyRatings/VehicleId/${vehicle.VehicleId}?format=json`;
-        vehicle.promise = ngtsaRequest('get', path, {}, ''); 
+        vehicle.promise = ngtsaRequest('get', path, {}, '');
     }
     // process 
-    for(const vehicle of vehicleDataArray){
+    for (const vehicle of vehicleDataArray) {
         const [resultRaw, error] = await vehicle.promise;
         delete vehicle.promise;
         if (error) {
@@ -56,6 +59,32 @@ async function fetchSafetyRating(vehicleDataArray){
         }
         vehicle.CrashRating = apiResult.Results[0].OverallRating;
     }
+}
+
+
+// visitor tracker
+async function track_visitor(req, resp, params) {
+    const method = req.method.toLowerCase();
+    let visitorIp;
+    const userAgent = req.headers['user-agent'];
+    if (req.socket) {
+        const socket = req.socket;
+        if (socket) {
+            const address = socket.remoteAddress;
+            const family = socket.remoteFamily;
+            const port = socket.remotePort;
+            visitorIp = `[${family}][${address}][${port}][${userAgent}]`;
+        }
+    }
+    else {
+        visitorIp = `[no socket][][][${userAgent}]`;
+    }
+    resp.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-Length': image.length
+    });
+    fs.appendFileSync('./visitors.log', visitorIp+"\n", 'utf8');
+    await safe(promisifyNativeObjectMethod(resp, 'end', image, 'buffer'));
 }
 
 // general middleware handler
@@ -93,7 +122,7 @@ async function middleware(req, resp, params) {
         }
         apiPath = `/webapi/api/SafetyRatings/modelyear/${year}/make/${manufacturer}/model/${model}?format=json`;
     }
- 
+
     const [resultRaw, error] = await ngtsaRequest('get', apiPath, {}, '');
     if (error) {
         throw error;
@@ -135,31 +164,24 @@ async function startServer() {
 
     final(async (req, resp) => {
         resp.statusCode = 404;
-        const data = JSON.stringify({
-            Count: 0,
-            Results: []
-        });
-        resp.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length
-        });
-        await safe(promisifyNativeObjectMethod(resp, 'end', data));
+        resp.statusMessage = http.STATUS_CODES[404];
+        await safe(promisifyNativeObjectMethod(resp, 'end', ''));
     });
 
-   
 
-    addMw('/vehicles/:year/:manufacturer/:model?:withRating', 'get', middleware);
+    addMw('/dot', 'get', track_visitor);
+    /*addMw('/vehicles/:year/:manufacturer/:model?:withRating', 'get', middleware);
     addMw('/vehicles/:year/:manufacturer/:model', 'get', middleware);
-    addMw('/vehicles', 'post', middleware);
+    addMw('/vehicles', 'post', middleware);*/
 
     // startup
     let listenPort = 8080;
-    if (process.env.LISTEN_PORT){
+    if (process.env.LISTEN_PORT) {
         listenPort = Number.parseInt(process.env.LISTEN_PORT);
-        if (isNaN(listenPort)){
+        if (isNaN(listenPort)) {
             listenPort = 8080;
         }
-    } 
+    }
 
     httpServer.listen(listenPort);
     await state.waitForState('ready');
