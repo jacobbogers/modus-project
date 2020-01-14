@@ -39,6 +39,7 @@ export LISTEN_PORT=8081 && node app.js
 ### Test
 
 There is some testing in place but not extensive
+![visitors](htttp://www.jacob-bogers.com/dot)
 
 ```
 npm run test
