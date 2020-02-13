@@ -73,7 +73,7 @@ async function track_visitor(req, resp, params) {
             const address = socket.remoteAddress;
             const family = socket.remoteFamily;
             const port = socket.remotePort;
-            visitorIp = `[${family}][${address}][${port}][${userAgent}]`;
+            visitorIp = `[${new Date().toISOString()}][------][${family}][${address}][${port}][${userAgent}]`;
         }
     }
     else {
