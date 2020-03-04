@@ -163,7 +163,7 @@ async function startServer() {
 
     httpServer.listen(listenPort);
     await state.waitForState('ready');
-    logger.info('Server listening on 8080');
+    logger.info(`Server listening on ${listenPort}`);
 }
 
 startServer();
