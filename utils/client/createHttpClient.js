@@ -14,7 +14,7 @@ module.exports = function createHttpClient(createHttpRequest, logger, config) {
     return async function send(method, path, originHeaders, originBody = '') {
         const headers = Object.assign({}, originHeaders);
         if (originBody.length > 0) {
-            headers['Content-Length'] = `${originBody.length}`;
+            headers['Content-Length'] = Buffer.byteLength(originBody);
             setContentType(headers);
         }
         else {

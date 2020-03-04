@@ -1,9 +1,7 @@
 const http = require('http');
 // "promisify" from util doesnt work on response.end() doesnt work with reponse.end
 const promisifyNativeObjectMethod = require('./utils/promisifyNativeObjectMethod');
-
 const colors = require('colors/safe');
-
 const safe = require('./utils/safe');
 const createServer = require('./utils/server/createServer');
 const createLogger = require('./utils/createLogger');
@@ -119,7 +117,7 @@ async function middleware(req, resp, params) {
     const responseData = JSON.stringify(response);
     resp.writeHead(200, {
         'Content-Type': 'application/json',
-        'Content-Length': responseData.length
+        'Content-Length': Buffer.byteLength(responseData)
     });
     await safe(promisifyNativeObjectMethod(resp, 'end', responseData));
 }
@@ -141,7 +139,7 @@ async function startServer() {
         });
         resp.writeHead(200, {
             'Content-Type': 'application/json',
-            'Content-Length': data.length
+            'Content-Length': Buffer.byteLength(data)
         });
         await safe(promisifyNativeObjectMethod(resp, 'end', data));
     });
